@@ -1,0 +1,8 @@
+{
+"type": "FeatureCollection",
+"name": "scm-3316-221",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:EPSG::31983" } },
+"features": [
+{ "type": "Feature", "properties": { "cd_ident": 2777, "cd_quadr": "3316-221", "cd_levan": 20 }, "geometry": { "type": "MultiPolygon", "coordinates": [ [ [ [ 332056.79, 7390360.98699999973 ], [ 332050.159, 7390937.75399999972 ], [ 332581.745, 7390943.85599999968 ], [ 332588.355, 7390367.09 ], [ 332056.79, 7390360.98699999973 ] ] ] ] } }
+]
+}
