@@ -26,6 +26,7 @@ import geopandas as gpd
 import pandas as pd
 import matplotlib.pyplot as plt
 import warnings
+from datetime import datetime
 
 warnings.filterwarnings('ignore', 'GeoSeries.notna', UserWarning)
 
@@ -39,6 +40,9 @@ df_s_s = gpd.read_file(f'gis/SIRGAS_SHP_distrito_polygon.shp')
 for i in df_s_s.itertuples():
     df_s = df_s_s[df_s_s.ds_codigo == i.ds_codigo]
 
+    now = datetime.now()
+    dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+    print("****** início: ", dt_string)	
     print(f"Executando {list(df_s.ds_codigo)[0]} - poligono de vias de {list(df_s.ds_nome)[0].lower()}")
     #df_s = df_s[df_s.ds_codigo == '1']
     # df_s = df_s.query("st_codigo == '037'")
@@ -71,8 +75,8 @@ for i in df_s_s.itertuples():
     df_vias_buffered = df_vias.buffer(0.1)
 
     # Obtendo os pontos finais e iniciais de cada logradouro podemos saber onde as ruas começam e terminam
-    gdf_cruzamentos_inicio = df_l['geometry'].map(lambda x: (x.interpolate(0, normalized=True)))
-    gdf_cruzamentos_final = df_l['geometry'].map(lambda x: (x.interpolate(1, normalized=True)))
+    gdf_cruzamentos_inicio = df_l[df_l['geometry'].type == 'LineString']['geometry'].map(lambda x: (x.interpolate(0, normalized=True)))
+    gdf_cruzamentos_final = df_l[df_l['geometry'].type == 'LineString']['geometry'].map(lambda x: (x.interpolate(1, normalized=True)))
     gdf_cruzamentos =  pd.concat([gdf_cruzamentos_inicio, gdf_cruzamentos_final])
     gdf_c = gdf_cruzamentos
 
@@ -146,7 +150,7 @@ for i in df_s_s.itertuples():
     lp = list(map(lambda x: MultiPoint([x.geometry.interpolate(0.5, normalized=True),
                                 x.geometry.interpolate(0.001, normalized=True),
                                 x.geometry.interpolate(0.999, normalized=True)]),
-            df_l.itertuples()))
+            df_l[df_l['geometry'].type == 'LineString'].itertuples()))
 
     df_lp = gpd.GeoDataFrame(geometry=lp)
 
@@ -163,3 +167,4 @@ for i in df_s_s.itertuples():
     # - Calcular a largura mínima máxima e média de cada via
 
     df_pvias.to_file("./resultado/poligono_de_vias.gpkg", layer=f"{list(df_s.ds_codigo)[0]} - poligono de vias de {list(df_s.ds_nome)[0].lower()}", driver="GPKG")
+    df_pvias.to_file(f"./resultado/poligono_de_vias_{list(df_s.ds_codigo)[0]}_{'_'.join(list(df_s.ds_nome)[0].split())}.gpkg", layer=f"{list(df_s.ds_codigo)[0]} - poligono de vias de {list(df_s.ds_nome)[0].capitalize()}", driver="GPKG")
