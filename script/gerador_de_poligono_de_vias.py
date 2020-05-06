@@ -36,6 +36,8 @@ plt.rcParams['figure.figsize'] = (40, 30)
 df_qv_s = gpd.read_file(f'gis/SIRGAS_SHP_quadraviariaed_polygon.shp')
 df_l_s = gpd.read_file(f'gis/SIRGAS_SHP_logradouronbl.shp')
 df_s_s = gpd.read_file(f'gis/SIRGAS_SHP_distrito_polygon.shp')
+df_represas = gpd.read_file(f'gis/SIRGAS_REPRESAS_NIVELMAX.shp')
+df_massa_dagua = gpd.read_file(f'gis/SIRGAS_MASSADAGUA.shp')
 
 for i in df_s_s.itertuples():
     df_s = df_s_s[df_s_s.ds_codigo == i.ds_codigo]
@@ -52,6 +54,12 @@ for i in df_s_s.itertuples():
 
     # Get the bounding box coordinates of the Polygon as a list
     bounds = list(df_s.bounds.values[0])
+
+    # Removendo área de represa
+    df_s = gpd.overlay(df_s, df_represas, how='difference')
+
+    # Removendoo Massa dagua
+    df_s = gpd.overlay(df_s, df_massa_dagua, how='difference')
 
     # Get the indices of the Points that are likely to be inside the bounding box of the given Polygon
     l_candidate_idx = list(df_l_sindex.intersection(bounds))
