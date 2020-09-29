@@ -14,11 +14,13 @@ import geopandas as gpd
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from shapely.ops import unary_union, polygonize, unary_union
+from shapely.ops import unary_union, polygonize, cascaded_union
 
 from shapely import affinity
 
 from datetime import datetime
+
+import os
 
 
 # df_qf_s = gpd.read_file(f'gis/SIRGAS_SHP_quadraMDSF.shp')
@@ -43,6 +45,8 @@ for i in df_s_s.itertuples():
     print("****** início: ", dt_string)	
     print(f"Executando {list(df_s.ds_codigo)[0]} - poligono de vias de {list(df_s.ds_nome)[0].lower()}")
     
+    if os.path.exists(f"./resultado/{list(df_s.ds_codigo)[0]} - poligono de vias de {list(df_s.ds_nome)[0].lower()}"):
+        continue
 
     # Data Frame dos canteiros
     df_canteiro = df_qv_s[df_qv_s['qe_tipo'] == 'Praca_Canteiro']
@@ -98,6 +102,7 @@ for i in df_s_s.itertuples():
     ## Removendo logradouros pequenos
     df_l = df_l[df_l.length > 6].reset_index()
 
+    df_l = df_l[~(df_l.geometry.type == 'GeometryCollection')]
 
     pontos = df_l.apply(lambda row: 
                         [row.geometry.interpolate(0, normalized=True),
@@ -149,7 +154,7 @@ for i in df_s_s.itertuples():
                                                             LineString(nearest_points(df_cruzamentos.iloc[int(row['index_right'])].geometry, row.geometry)),
                                                             axis=1)
 
-    s = 1.1
+    s = 1.05
 
     if not linha_cruzamento_canteiro.empty:
         df_linha_cruzamento_canteiro = gpd.GeoDataFrame(geometry=linha_cruzamento_canteiro)
@@ -175,7 +180,7 @@ for i in df_s_s.itertuples():
     linhas_corte = unary_union([df_corte_canteiros[df_corte_canteiros.is_valid].unary_union, 
                                df_corte_quadras[df_corte_quadras.is_valid].unary_union])
 
-    poligonos_de_vias = polygonize(unary_union([vias_cutted, linhas_corte, df_s.envelope.boundary.buffer(10).unary_union]))
+    poligonos_de_vias = polygonize(cascaded_union([vias_cutted, linhas_corte, df_s.envelope.boundary.buffer(10).unary_union]))
 
     df_poligonos_de_vias = gpd.GeoDataFrame(geometry = list(poligonos_de_vias))
 
@@ -187,6 +192,6 @@ for i in df_s_s.itertuples():
     df_pvias = df_poligonos_de_vias[df_poligonos_de_vias.geometry.within(df_vias_clipped.buffer(0.1).geometry.unary_union)]
     df_pvias.crs = 'EPSG:31983'
 
-    df_pvias.to_file("./resultado/poligono_de_vias.gpkg", layer=f"{list(df_s.ds_codigo)[0]} - poligono de vias de {list(df_s.ds_nome)[0].lower()}", driver="GPKG", OVERWRITE='YES')
-    df_pvias.to_file(f"./resultado/{list(df_s.ds_codigo)[0]} - poligono de vias de {list(df_s.ds_nome)[0].lower()}", driver="GPKG")
+    df_pvias.to_file("./resultado/poligono_de_vias.gpkg", layer=f"{list(df_s.ds_codigo)[0]} - poligono de vias de {list(df_s.ds_nome)[0].lower()}.gpkg", driver="GPKG", OVERWRITE='YES')
+    df_pvias.to_file(f"./resultado/{list(df_s.ds_codigo)[0]} - poligono de vias de {list(df_s.ds_nome)[0].lower()}.gpkg", driver="GPKG")
 
