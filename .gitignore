@@ -1,5 +1,6 @@
 env.py
 gis/
 resultado/poligono_de_vias.gpkg
+resultado/poligono_de_vias_com_larguras.gpkg
 resultado/*.gpkg-wal
 resultado/*.gpkg-shm

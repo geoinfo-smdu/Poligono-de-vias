@@ -189,7 +189,8 @@ for i in df_s_s.itertuples():
     else:
         df_vias_clipped = gpd.overlay(df_vias, df_ct, how='difference')
 
-    df_pvias = df_poligonos_de_vias[df_poligonos_de_vias.geometry.within(df_vias_clipped.buffer(0.1).geometry.unary_union)]
+    # df_pvias = df_poligonos_de_vias[df_poligonos_de_vias.geometry.within(df_vias_clipped.buffer(0.1).geometry.unary_union)]
+    df_pvias = df_poligonos_de_vias[df_poligonos_de_vias.geometry.intersects(df_vias_clipped.buffer(-0.1).geometry.unary_union)]
     df_pvias.crs = 'EPSG:31983'
 
     df_pvias.to_file("./resultado/poligono_de_vias.gpkg", layer=f"{list(df_s.ds_codigo)[0]} - poligono de vias de {list(df_s.ds_nome)[0].lower()}.gpkg", driver="GPKG", OVERWRITE='YES')
