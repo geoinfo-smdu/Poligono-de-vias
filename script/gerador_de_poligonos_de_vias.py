@@ -194,5 +194,5 @@ for i in df_s_s.itertuples():
     df_pvias.crs = 'EPSG:31983'
 
     df_pvias.to_file("./resultado/poligono_de_vias.gpkg", layer=f"{list(df_s.ds_codigo)[0]} - poligono de vias de {list(df_s.ds_nome)[0].lower()}.gpkg", driver="GPKG", OVERWRITE='YES')
-    df_pvias.to_file(f"./resultado/{list(df_s.ds_codigo)[0]} - poligono de vias de {list(df_s.ds_nome)[0].lower()}.gpkg", driver="GPKG")
+    df_pvias.to_file(f"./resultado/{list(df_s.ds_codigo)[0]}_poligono_de_vias_de_{list(df_s.ds_nome)[0].lower().replace(' ', '_')}.gpkg", driver="GPKG")
 
